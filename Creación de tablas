@@ -1,0 +1,239 @@
+-- 1. CATEGORIAPRODUCTO
+CREATE TABLE CategoriaProducto (
+    id_categoria NUMBER PRIMARY KEY,
+    nombre_categoria VARCHAR2(100),
+    descripcion VARCHAR2(255)
+);
+
+-- 2. ALMACEN
+CREATE TABLE Almacen (
+    id_almacen NUMBER PRIMARY KEY,
+    materia_prima VARCHAR2(255)
+);
+
+-- 3. PRODUCTO
+CREATE TABLE Producto (
+    id_producto NUMBER PRIMARY KEY,
+    nombre VARCHAR2(100),
+    descripcion VARCHAR2(255),
+    precio NUMBER(6,2),
+    estado VARCHAR2(50),
+    tipo_producto VARCHAR2(20),
+    id_categoria NUMBER
+);
+
+-- 4. INGREDIENTE
+CREATE TABLE Ingrediente (
+    id_ingrediente NUMBER PRIMARY KEY,
+    nombre VARCHAR2(100),
+    descripcion VARCHAR2(255),
+    id_producto NUMBER,
+    id_almacen NUMBER
+);
+
+-- 5. PROMOCION
+CREATE TABLE Promocion (
+    id_promocion NUMBER PRIMARY KEY,
+    descuento NUMBER(5,2),
+    descripcion VARCHAR2(255),
+    fecha_inicio DATE,
+    fecha_fin DATE
+);
+
+-- 6. PRODUCTO_PROMOCION (INTERMEDIA)
+CREATE TABLE Producto_Promocion (
+    id_producto NUMBER,
+    id_promocion NUMBER,
+    PRIMARY KEY (id_producto, id_promocion)
+);
+
+-- 7. CLIENTE
+CREATE TABLE Cliente (
+    id_cliente NUMBER PRIMARY KEY,
+    nombre VARCHAR2(100),
+    apellido VARCHAR2(100),
+    correo VARCHAR2(100),
+    telefono VARCHAR2(15),
+    fecha_registro DATE
+);
+
+-- 8. EMPLEADO
+CREATE TABLE Empleado (
+    id_empleado NUMBER PRIMARY KEY,
+    nombre VARCHAR2(100),
+    apellido VARCHAR2(100),
+    correo VARCHAR2(100),
+    telefono VARCHAR2(15),
+    cargo VARCHAR2(50),
+    id_caja NUMBER
+);
+
+-- 9. CAJA
+CREATE TABLE Caja (
+    id_caja NUMBER PRIMARY KEY,
+    descripcion VARCHAR2(255),
+    estado VARCHAR2(50)
+);
+
+-- 10. MEDIOPAGO
+CREATE TABLE MedioPago (
+    id_medio_pago NUMBER PRIMARY KEY,
+    tipo_pago VARCHAR2(50)
+);
+
+-- 11. LISTAESPERA
+CREATE TABLE ListaEspera (
+    id_lista_espera NUMBER PRIMARY KEY,
+    codigo VARCHAR2(50)
+);
+
+-- 12. TURNO
+CREATE TABLE Turno (
+    id_turno NUMBER PRIMARY KEY,
+    hora_asignado TIMESTAMP,
+    estado VARCHAR2(50),
+    numero_turno NUMBER,
+    id_lista_espera NUMBER
+);
+
+-- 13. BOLETA
+CREATE TABLE Boleta (
+    id_boleta NUMBER PRIMARY KEY,
+    fecha_emision DATE,
+    total NUMBER(6,2)
+);
+
+-- 14. PEDIDO
+CREATE TABLE Pedido (
+    id_pedido NUMBER PRIMARY KEY,
+    total NUMBER(6,2),
+    estado VARCHAR2(50),
+    fecha_hora TIMESTAMP,
+    id_cliente NUMBER,
+    id_empleado NUMBER,
+    id_caja NUMBER,
+    id_medio_pago NUMBER,
+    id_turno NUMBER,
+    id_boleta NUMBER
+);
+
+-- 15. PEDIDO_PRODUCTO (INTERMEDIA)
+CREATE TABLE Pedido_Producto (
+    id_pedido NUMBER,
+    id_producto NUMBER,
+    cantidad NUMBER,
+    PRIMARY KEY (id_pedido, id_producto)
+);
+
+
+-- 16. ENCUESTASATISFACCION
+CREATE TABLE EncuestaSatisfaccion (
+    id_encuesta NUMBER PRIMARY KEY,
+    valoracion NUMBER(1),
+    comentarios VARCHAR2(255),
+    id_boleta NUMBER
+);
+
+-- 17. INCIDENCIA
+CREATE TABLE Incidencia (
+    id_incidencia NUMBER PRIMARY KEY,
+    descripcion VARCHAR2(255),
+    fecha_hora TIMESTAMP,
+    estado VARCHAR2(50),
+    id_pedido NUMBER,
+    id_empleado NUMBER
+);
+
+-- ===============================
+-- RESTRICCIONES (FOREIGN KEYS)
+-- ===============================
+
+-- Producto -> CategoriaProducto
+ALTER TABLE Producto
+ADD CONSTRAINT fk_producto_categoria
+FOREIGN KEY (id_categoria) REFERENCES CategoriaProducto(id_categoria);
+
+-- Ingrediente -> Producto
+ALTER TABLE Ingrediente
+ADD CONSTRAINT fk_ingrediente_producto
+FOREIGN KEY (id_producto) REFERENCES Producto(id_producto);
+
+-- Ingrediente -> Almacen
+ALTER TABLE Ingrediente
+ADD CONSTRAINT fk_ingrediente_almacen
+FOREIGN KEY (id_almacen) REFERENCES Almacen(id_almacen);
+
+-- Producto_Promocion -> Producto
+ALTER TABLE Producto_Promocion
+ADD CONSTRAINT fk_prodpromo_producto
+FOREIGN KEY (id_producto) REFERENCES Producto(id_producto);
+
+-- Producto_Promocion -> Promocion
+ALTER TABLE Producto_Promocion
+ADD CONSTRAINT fk_prodpromo_promocion
+FOREIGN KEY (id_promocion) REFERENCES Promocion(id_promocion);
+
+-- Turno -> ListaEspera
+ALTER TABLE Turno
+ADD CONSTRAINT fk_turno_lista
+FOREIGN KEY (id_lista_espera) REFERENCES ListaEspera(id_lista_espera);
+
+-- Pedido -> Cliente
+ALTER TABLE Pedido
+ADD CONSTRAINT fk_pedido_cliente
+FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente);
+
+-- Pedido -> Empleado
+ALTER TABLE Pedido
+ADD CONSTRAINT fk_pedido_empleado
+FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado);
+
+-- Pedido -> Caja
+ALTER TABLE Pedido
+ADD CONSTRAINT fk_pedido_caja
+FOREIGN KEY (id_caja) REFERENCES Caja(id_caja);
+
+-- Pedido -> MedioPago
+ALTER TABLE Pedido
+ADD CONSTRAINT fk_pedido_mediopago
+FOREIGN KEY (id_medio_pago) REFERENCES MedioPago(id_medio_pago);
+
+-- Pedido -> Turno
+ALTER TABLE Pedido
+ADD CONSTRAINT fk_pedido_turno
+FOREIGN KEY (id_turno) REFERENCES Turno(id_turno);
+
+-- Pedido -> Boleta
+ALTER TABLE Pedido
+ADD CONSTRAINT fk_pedido_boleta
+FOREIGN KEY (id_boleta) REFERENCES Boleta(id_boleta);
+
+-- Pedido_Producto -> Pedido
+ALTER TABLE Pedido_Producto
+ADD CONSTRAINT fk_pedidoprod_pedido
+FOREIGN KEY (id_pedido) REFERENCES Pedido(id_pedido);
+
+-- Pedido_Producto -> Producto
+ALTER TABLE Pedido_Producto
+ADD CONSTRAINT fk_pedidoprod_producto
+FOREIGN KEY (id_producto) REFERENCES Producto(id_producto);
+
+-- EncuestaSatisfaccion -> Boleta
+ALTER TABLE EncuestaSatisfaccion
+ADD CONSTRAINT fk_encuesta_boleta
+FOREIGN KEY (id_boleta) REFERENCES Boleta(id_boleta);
+
+-- Incidencia -> Pedido
+ALTER TABLE Incidencia
+ADD CONSTRAINT fk_incidencia_pedido
+FOREIGN KEY (id_pedido) REFERENCES Pedido(id_pedido);
+
+-- Incidencia -> Empleado
+ALTER TABLE Incidencia
+ADD CONSTRAINT fk_incidencia_empleado
+FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado);
+
+-- Empleado -> Caja
+ALTER TABLE Empleado
+ADD CONSTRAINT fk_empleado_caja
+FOREIGN KEY (id_caja) REFERENCES Caja(id_caja);
