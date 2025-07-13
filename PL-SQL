@@ -1,0 +1,58 @@
+--Promedio Total Pedidos
+DECLARE
+    v_promedio NUMBER;
+BEGIN
+    SELECT AVG(total)
+    INTO v_promedio
+    FROM PEDIDO;
+    DBMS_OUTPUT.PUT_LINE('Promedio del total de pedidos: S/.' || TO_CHAR(v_promedio, 'FM9990.00'));
+END;
+
+--Cantidad boletas emitidas por mes
+SELECT 
+    TO_CHAR(fecha_emision, 'YYYY-MM') AS mes,
+    COUNT(*) AS total_boletas
+FROM BOLETA
+GROUP BY TO_CHAR(fecha_emision, 'YYYY-MM')
+ORDER BY mes;
+
+--Top productos más solicitados
+SELECT P.NOMBRE, COUNT(*) AS veces_solicitado
+FROM PEDIDO_PRODUCTO PP
+JOIN PRODUCTO P ON PP.id_producto = p.id_producto
+GROUP BY P.NOMBRE
+ORDER BY veces_solicitado DESC;
+
+--Mostrar incidencias con prioridad alta
+SELECT *
+FROM INCIDENCIA
+WHERE estado = 'Abierta';
+
+--Total de ventas por medio de pago Pagado
+SELECT MP.tipo_pago, SUM(P.total) AS total_ventas
+FROM BOLETA B
+RIGHT JOIN PEDIDO P ON B.id_pedido = P.id_pedido
+RIGHT JOIN MEDIOPAGO MP ON P.id_medio_pago = MP.id_medio_pago
+WHERE ESTADO = 'Pagado'
+GROUP BY MP.tipo_pago;
+
+--Procedimiento: Registrar encuesta de satisfacción
+CREATE OR REPLACE PROCEDURE registrar_encuesta(
+    p_valoracion NUMBER,
+    p_comentario VARCHAR2,
+    p_id_boleta NUMBER
+) AS
+    v_id NUMBER;
+BEGIN
+    SELECT NVL(MAX(id_encuesta), 0) + 1 INTO v_id FROM ENCUESTASATISFACCION;
+
+    INSERT INTO ENCUESTASATISFACCION (id_encuesta, valoracion, comentarios, id_boleta)
+    VALUES (v_id, p_valoracion, p_comentario, p_id_boleta);
+    DBMS_OUTPUT.PUT_LINE('Encuesta registrada con ID: ' || v_id);
+END;
+
+--Empleado por Caja Asignada
+SELECT c.descripcion AS caja, COUNT(e.id_empleado) AS cantidad_empleados
+FROM CAJA c
+LEFT JOIN EMPLEADO e ON c.id_caja = e.id_caja
+GROUP BY c.descripcion;
