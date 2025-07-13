@@ -1,0 +1,49 @@
+Cliente
+a) Registrar nuevo cliente (al momento de realizar su primer pedido):
+INSERT INTO Cliente (id_cliente, nombre, apellido, correo, telefono, fecha_registro)
+VALUES (1001, 'Pedro', 'Perez', 'pedroperez@aloe.ulima.edu.pe', '987654321', SYSDATE);
+
+b) Consultar estado del pedido:
+SELECT P.id_pedido, T.numero_turno, P.estado
+FROM Pedido P
+JOIN Turno T ON P.id_turno = T.id_turno
+WHERE P.id_cliente = 1001
+ORDER BY P.fecha_hora DESC;
+
+c) Registrar encuesta de satisfacción:
+INSERT INTO EncuestaSatisfaccion (id_encuesta, valoracion, comentarios, id_boleta)
+VALUES (501, 4, 'Muy buena atención y rápido servicio', 2001);
+
+Empleado - Cajero
+a) Registrar nuevo pedido:
+INSERT INTO Pedido (id_pedido, total, estado, fecha_hora, id_cliente, id_empleado, id_caja, id_medio_pago, id_turno, id_boleta)
+VALUES (3001, 28.50, 'En preparación', SYSTIMESTAMP, 1001, 201, 1, 2, 301, 2001);
+b) Asociar productos al pedido:
+INSERT INTO Pedido_Producto (id_pedido, id_producto, cantidad)
+VALUES (3001, 10, 1);  
+INSERT INTO Pedido_Producto (id_pedido, id_producto, cantidad)
+VALUES (3001, 12, 1);
+
+Empleado - Cocinero
+a) Cambiar estado del pedido a “Listo”:
+UPDATE Pedido
+SET estado = 'Listo'
+WHERE id_pedido = 3001;
+b) Consultar pedidos pendientes:
+SELECT id_pedido, estado, fecha_hora
+FROM Pedido
+WHERE estado IN ('En preparación', 'Pendiente')
+ORDER BY fecha_hora ASC;
+
+Encargado/Supervisor
+a) Registrar una incidencia:
+INSERT INTO Incidencia (id_incidencia, descripcion, fecha_hora, estado, id_pedido, id_empleado)
+VALUES (701, 'Cliente recibió pedido incorrecto', SYSTIMESTAMP, 'Abierta', 3001, 205);
+b) Consultar encuestas con baja calificación:
+SELECT *
+FROM EncuestaSatisfaccion
+WHERE valoracion <= 2;
+c) Consultar promociones activas:
+SELECT *
+FROM Promocion
+WHERE SYSDATE BETWEEN fecha_inicio AND fecha_fin;
